@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from materials.models import Course, Lesson
 
 
 class UserManager(BaseUserManager):
@@ -27,20 +28,18 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    """Кастомная модель пользователя на базе AbstractBaseUser (Критерии оценки, Задание 2)."""
+    """Кастомная модель пользователя на базе AbstractBaseUser (Задание 2)."""
 
     email = models.EmailField(unique=True, verbose_name="Email")
     phone = models.CharField(max_length=35, blank=True, null=True, verbose_name="Телефон")
     city = models.CharField(max_length=100, blank=True, null=True, verbose_name="Город")
     avatar = models.ImageField(upload_to="users/avatars/", blank=True, null=True, verbose_name="Аватарка")
 
-    # Системные поля для интеграции с админкой Django
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     is_staff = models.BooleanField(default=False, verbose_name="Персонал")
 
     objects = UserManager()
 
-    # Меняем авторизацию на email согласно ТЗ
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
@@ -50,3 +49,58 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class Payment(models.Model):
+    """Модель учета финансовых платежей пользователей (Задание 2)."""
+
+    PAYMENT_METHOD_CASH = "Наличные"
+    PAYMENT_METHOD_TRANSFER = "Перевод"
+
+    PAYMENT_METHOD_CHOICES = [
+        (PAYMENT_METHOD_CASH, "Наличные"),
+        (PAYMENT_METHOD_TRANSFER, "Перевод на счет"),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="payments",
+        verbose_name="Пользователь",
+    )
+    payment_date = models.DateField(auto_now_add=True, verbose_name="Дата оплаты")
+
+    paid_course = models.ForeignKey(
+        Course,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="payments",
+        verbose_name="Оплаченный курс",
+    )
+    paid_lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="payments",
+        verbose_name="Оплаченный урок",
+    )
+
+    # Исправили decimal_digits на корректный decimal_places
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Сумма оплаты")
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PAYMENT_METHOD_CHOICES,
+        default=PAYMENT_METHOD_TRANSFER,
+        verbose_name="Способ оплаты",
+    )
+
+    class Meta:
+        verbose_name = "Платеж"
+        verbose_name_plural = "Платежи"
+        ordering = ["-payment_date"]
+
+    def __str__(self):
+        content = self.paid_course.name if self.paid_course else self.paid_lesson.name
+        return f"Платеж {self.user.email} за {content} на сумму {self.amount}"
