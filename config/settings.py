@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -19,9 +20,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Сторонние пакеты (Задание 1, Шаг 1)
+    # Сторонние пакеты
     "rest_framework",
-    "django_filters",  # Добавили пакет фильтрации для Задания 4
+    "django_filters",
+    "rest_framework_simplejwt",  # Подключили JWT-авторизацию (Задание 1)
 
     # Наши приложения
     "users",
@@ -69,6 +71,28 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = "users.User"
+
+# Глобальные настройки Django Rest Framework (Задание 1)
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",  # Глобально закрыли весь API авторизацией
+    ),
+}
+
+# Настройки времени жизни JWT-токенов
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "UPDATE_LAST_LOGIN": False,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
