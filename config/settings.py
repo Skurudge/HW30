@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Загружаем переменные из .env (Шаг 4)
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +19,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Пакет Django Rest Framework (Задание 1)
+    # Сторонние пакеты (Задание 1, Шаг 1)
     "rest_framework",
+    "django_filters",  # Добавили пакет фильтрации для Задания 4
 
-    # Наши будущие приложения (Задание 2)
+    # Наши приложения
     "users",
     "materials",
 ]
@@ -57,19 +57,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Связываем проект с новой базой lms_db из .env
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
+        "NAME": os.getenv("DB_NAME", "lms_db"),
+        "USER": os.getenv("DB_USER", "postgres"),
         "PASSWORD": os.getenv("DB_PASSWORD"),
         "HOST": os.getenv("DB_HOST", "127.0.0.1"),
         "PORT": os.getenv("DB_PORT", "5432"),
     }
 }
 
-# Переключение на кастомную модель пользователя (Задание 2)
 AUTH_USER_MODEL = "users.User"
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -79,7 +77,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Настройки локализации
 LANGUAGE_CODE = "ru-ru"
 TIME_ZONE = "Europe/Moscow"
 USE_I18N = True
@@ -88,6 +85,5 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Настройки медиа для хранения аватарок и превью (Задание 2)
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
