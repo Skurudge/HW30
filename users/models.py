@@ -104,3 +104,7 @@ class Payment(models.Model):
     def __str__(self):
         content = self.paid_course.name if self.paid_course else self.paid_lesson.name
         return f"Платеж {self.user.email} за {content} на сумму {self.amount}"
+
+    # Поля интеграции финтех-шлюза Stripe (Задание 2)
+    stripe_session_id = models.CharField(max_length=255, blank=True, null=True, verbose_name="ID сессии Stripe")
+    stripe_payment_url = models.TextField(blank=True, null=True, verbose_name="Ссылка на оплату")

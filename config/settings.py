@@ -23,7 +23,9 @@ INSTALLED_APPS = [
     # Сторонние пакеты
     "rest_framework",
     "django_filters",
-    "rest_framework_simplejwt",  # Подключили JWT-авторизацию (Задание 1)
+    "rest_framework_simplejwt",
+    "drf_spectacular",  # Пакет автодокументирования Swagger/Redoc (Критерии оценки)
+    "drf_spectacular_sidecar",  # Локальные ассеты для Swagger без CDN
 
     # Наши приложения
     "users",
@@ -72,17 +74,29 @@ DATABASES = {
 
 AUTH_USER_MODEL = "users.User"
 
-# Глобальные настройки Django Rest Framework (Задание 1)
+# Глобальные настройки Django Rest Framework
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",  # Глобально закрыли весь API авторизацией
+        "rest_framework.permissions.IsAuthenticated",
     ),
+    # Переключаем DRF на автогенератор документации OpenAPI 3 (Критерии оценки)
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-# Настройки времени жизни JWT-токенов
+# Конфигурация Swagger / Redoc
+SPECTACULAR_SETTINGS = {
+    "TITLE": "LMS Platform API",
+    "DESCRIPTION": "Документация эндпоинтов бэкенд-сервера онлайн-обучения",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
+}
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -111,3 +125,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# --- Настройки интеграции Stripe API (Критерии оценки) ---
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")

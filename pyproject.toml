@@ -18,7 +18,10 @@ dependencies = [
     "mypy (>=2.1.0,<3.0.0)",
     "djangorestframework-stubs (>=3.17.0,<4.0.0)",
     "django-filter (>=25.2,<26.0)",
-    "djangorestframework-simplejwt (>=5.5.1,<6.0.0)"
+    "djangorestframework-simplejwt (>=5.5.1,<6.0.0)",
+    "stripe (>=15.2.0,<16.0.0)",
+    "drf-spectacular (>=0.29.0,<0.30.0)",
+    "drf-spectacular-sidecar (>=2026.6.1,<2027.0.0)"
 ]
 
 

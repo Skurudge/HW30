@@ -5,26 +5,34 @@
 
 ---
 
-## 📋 Чек-лист проверки функционала (Урок 32.1)
+## 📋 Чек-лист проверки функционала (Урок 32.2)
 
 ### 1. Архитектура, Сериализаторы и Финансы (Уроки 30.1 - 30.2)
-- [ ] **Интеграция DRF и Модели:** К проекту подключен пакет `djangorestframework` [Задание 1]. В приложении `users` развернута модель `User` на базе `AbstractBaseUser` с авторизацией по `email` [users:models]. В приложении `materials` спроектированы сущности **Курс** и **Урок** со связью «один-ко-многим» [materials:models].
-- [ ] **Агрегация и Финансы:** В `CourseSerializer` добавлено динамическое поле `lessons_count` (`SerializerMethodField()`) и сквозной вложенный массив `lessons` [materials:serializers]. Создана модель `Payment` для учета оплат с фильтрацией `django-filter` и кастомной командой наполнения `fill_payments` [users:models].
+- [ ] **1. Интеграция DRF:** К проекту подключен пакет `djangorestframework` [Задание 1].
+- [ ] **2. Кастомная модель пользователя:** В приложении `users` развернута модель `User` на базе `AbstractBaseUser` с авторизацией по `email` [users:models]. Добавлены профильные поля: телефон, город и аватарка.
+- [ ] **3. Модели материалов обучения:** В приложении `materials` спроектированы сущности **Курс** и **Урок** со связью «один-ко-многим» [materials:models].
+- [ ] **4. CRUD для Курсов и Уроков:** С помощью `ModelViewSet` развернут полный автоматический набор API-эндпоинтов для курсов [materials:views]. На базе цепочки Generic-классов вручную описаны изолированные эндпоинты для всех операций с уроками.
+- [ ] **5. Подсчет уроков:** В `CourseSerializer` добавлено динамическое поле `lessons_count` (`SerializerMethodField()`) [materials:serializers].
+- [ ] **6. Вложенная структура:** Реализован сквозной вывод уроков внутри курса (массив `lessons` в JSON) [materials:serializers].
+- [ ] **7. Первичная модель платежей:** Создана модель `Payment` для учета базовых оплат с фильтрацией `django-filter` и кастомной командой наполнения `fill_payments` [users:models, users:management:commands:fill_payments].
 
-### 2. Авторизация и Разграничение Прав Доступа (Урок 31)
-- [ ] **JWT-безопасность:** Интегрирована токенизированная защита `rest_framework_simplejwt` [config:settings]. API закрыт проверкой `IsAuthenticated`.
-- [ ] **Ролевая модель:** Спроектирована группа "Модераторы" и кастомный permission-класс `IsModerator` [users:permissions]. Модераторы могут только читать и изменять контент, но лишены прав на создание и удаление [materials:views]. Обычные пользователи через класс `IsOwner` управляют исключительно своими объектами [users:permissions].
+### 2. Авторизация и Разграничение Правы Доступа (Урок 31)
+- [ ] **8. JWT-безопасность:** Интегрирована токенизированная защита `rest_framework_simplejwt` [config:settings]. Глобальный API закрыт проверкой `IsAuthenticated`.
+- [ ] **9. Открытая регистрация:** Разработан открытый эндпоинт `users/register/` с правами `AllowAny` [users:views, users:urls]. Пароли принудительно хэшируются (`set_password`).
+- [ ] **10. Модераторский доступ:** Спроектирована группа "Модераторы" и кастомный permission-класс `IsModerator` [users:permissions]. Модераторы могут только читать и изменять контент, но лишены прав на создание и удаление [materials:views].
+- [ ] **11. Права владельцев:** Обычные пользователи через класс `IsOwner` управляют исключительно своими объектами [users:permissions]. Настроен автоматический хук `perform_create` [materials:views].
+- [ ] **12. Защита чужих профилей:** При просмотре чужого аккаунта пароль и история оплат автоматически скрываются из JSON-выдачи [users:serializers].
 
-### 3. Валидация, Подписки и Пагинация (Урок 32.1)
-- [ ] **Валидация контента (Задание 1):** Разработана функция-валидатор `validate_youtube_url` [materials:validators]. Она привязана к полю `video_url` в сериализаторе уроков и блокирует любые внешние ссылки, кроме видеохостинга `youtube.com` / `youtu.be` [materials:serializers]. При ошибке возвращается понятный человекочитаемый JSON-текст.
-- [ ] **Модель подписок (Задание 2):** В приложении `materials` создана модель `Subscription` [materials:models]. Гарантирована уникальность пары ID пользователя и ID курса через `UniqueConstraint` базы данных [materials:models].
-- [ ] **Управление подписками (Задание 2):** Реализован эндпоинт `courses/subscribe/` на базе `APIView` с методом `POST` [materials:views, materials:urls]. Он удаляет подписку при ее наличии или создает при отсутствии, возвращая корректные сообщения.
-- [ ] **Признак подписки в курсах (Задание 2):** В `CourseSerializer` интегрировано динамическое поле `is_subscribed` (`SerializerMethodField`), отображающее статус подписки текущего авторизованного студента на этот курс [materials:serializers].
-- [ ] **Пагинация LMS (Задание 3):** Создан класс `LMSPagination` на базе `PageNumberPagination` с параметрами `page_size=5`, `page_size_query_param` и `max_page_size=50` [materials:paginators]. Пагинация успешно добавлена в ViewSet курсов и список уроков [materials:views].
+### 3. Валидация, Подписки и Тестирование (Урок 32.1)
+- [ ] **13. Валидация контента:** Разработана функция-валидатор `validate_youtube_url`, блокирующая любые внешние видео-ссылки в уроках, кроме `youtube.com` / `youtu.be` [materials:validators].
+- [ ] **14. Модель и управление подписками:** Реализован эндпоинт `courses/subscribe/` с логикой `UniqueConstraint` базы данных для переключения статуса подписки студента на курс [materials:views, materials:models]. Status-признак `is_subscribed` выводится в курсах [materials:serializers].
+- [ ] **15. Пагинация LMS:** Создан класс `LMSPagination` (`page_size=5`), ограничивающий постраничный вывод списков курсов и уроков [materials:paginators, materials:views].
+- [ ] **16. Автоматизированное тестирование:** Написаны 9 комплексных тестов в `materials/tests.py`, проверяющих CRUD, роли и подписки [materials:tests]. Итоговый отчет зафиксирован в файле `coverage.txt` с покрытием кода **83%**.
 
-### 4. Автоматизированное тестирование (Задание 4)
-- [ ] **Комплексные тесты:** Написаны автоматические тесты в файле `materials/tests.py`, покрывающие полный цикл CRUD для уроков, логику подписок на курсы и проверку ролей доступов (студенты/модераторы) через `force_authenticate()` [materials:tests].
-- [ ] **Покрытие кода (Coverage):** Интегрирована утилита `coverage` [config:settings]. Все 9 тестов проходят со статусом `OK`, а итоговый отчет зафиксирован в корневом файле `coverage.txt` с показателем покрытия **83%**.
+### 4. Документирование и Безопасность (Урок 32.2)
+- [ ] **17. Автодокументирование Swagger & Redoc (Задание 1):** Интегрирован генератор схем OpenAPI 3 через `drf-spectacular` [config:settings]. Интерактивная документация параметров, схем запросов и ошибок доступна по адресам `api/docs/swagger/` и `api/docs/redoc/` [config:urls]. Нестандартные контроллеры описаны вручную через `@extend_schema` [users:views].
+- [ ] **18. Финтех-интеграция Stripe API (Задание 2):** Реализован сервисный слой `StripeService` с перехватом исключений [materials:services]. Контроллер `PaymentCreateAPIView` регистрирует продукты, переводит суммы строго в копейки (`int`), генерирует сессии Checkout и возвращает клиенту прямую ссылку на оплату [users:views].
+- [ ] **19. Проверка статуса сессии (Дополнительное задание):** Реализован эндпоинт проверки статуса транзакции по её ID. Контроллер обращается к Stripe методом Retrieve (`Session.retrieve`) и отдает актуальный статус оплаты (`payment_status`) в JSON-формате [users:views, users:urls].
 
 ---
 
@@ -33,8 +41,8 @@
 * **Django** версии 6.0+ [config:settings]
 * **Django Rest Framework** версии 3.15+ [config:settings]
 * **Simple-JWT** (JSON Web Token авторизация) [config:settings]
-* **Django-filter** (фильтрация API эндпоинтов) [config:settings]
-* **Coverage** (анализ покрытия кода тестами) [config:settings]
+* **Stripe API SDK** (финтех-интеграция эквайринга) [config:settings]
+* **Drf-spectacular** (документация OpenAPI 3 Swagger/Redoc) [config:settings]
 * **PostgreSQL** (основная СУБД) [config:settings]
 * **Пакетный менеджер:** Poetry [config:settings]
 
@@ -55,6 +63,7 @@
    DB_PASSWORD=ваш_пароль_от_postgres
    DB_HOST=127.0.0.1
    DB_PORT=5432
+   STRIPE_SECRET_KEY="ваш_секретный_тестовый_ключ_stripe_sk_test_..."
    ```
 3. **Сгенерируйте и примените миграции базы данных:**
    ```bash
@@ -66,22 +75,15 @@
    poetry run python manage.py create_moderators
    poetry run python manage.py fill_payments
    ```
-5. **Запустите автоматические тесты и проверьте покрытие:**
-   ```bash
-   poetry run coverage run --source='.' manage.py test
-   poetry run coverage report
-   ```
-6. **Запустите локальный API-сервер:**
+5. **Запустите локальный API-сервер:**
    ```bash
    poetry run python manage.py runserver
    ```
 
 ---
 
-## Базовые эндпоинты API для тестирования:
+## Финтех-эндпоинты API для тестирования в Postman:
 
-* **Регистрация нового студента:** `POST -> 127.0.0.1:8000/api/users/register/`
-* **Авторизация (Получение Access/Refresh токенов):** `POST -> 127.0.0.1:8000/api/users/token/`
-* **Управление подпиской на курс (Переключатель):** `POST -> 127.0.0.1:8000/api/courses/subscribe/` (Передать JSON `{"course_id": <id>}`)
-* **Пагинированный список курсов (с признаком подписки):** `GET -> 127.0.0.1:8000/api/courses/`
-* **Пагинированный список уроков:** `GET -> 127.0.0.1:8000/api/lessons/`
+* **Инициация покупки курса/урока в Stripe:** `POST -> 127.0.0.1:8000/api/users/payments/create/` (Передать JSON `{"paid_course": 1, "amount": 2500.00}`)
+* **Проверка актуального статуса оплаты транзакции в Stripe:** `GET -> 127.0.0.1:8000/api/users/payments/<id_платежа>/status/`
+* **Интерактивная документация Swagger UI:** `GET -> 127.0.0.1:8000/api/docs/swagger/`
