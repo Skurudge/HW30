@@ -64,5 +64,6 @@ exclude = ["venv", ".venv", "migrations"]
 [dependency-groups]
 dev = [
     "django-stubs (>=6.0.5,<7.0.0)",
-    "djangorestframework-stubs (>=3.17.0,<4.0.0)"
+    "djangorestframework-stubs (>=3.17.0,<4.0.0)",
+    "coverage (>=7.14.1,<8.0.0)"
 ]
