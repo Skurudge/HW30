@@ -5,8 +5,7 @@ from users.apps import UsersConfig
 from users.views import (
     UserCreateAPIView,
     UserProfileAPIView,
-    PaymentListAPIView,
-    PaymentCreateAPIView
+    PaymentListAPIView
 )
 
 app_name = UsersConfig.name
@@ -20,7 +19,6 @@ urlpatterns = [
     path("register/", UserCreateAPIView.as_view(), name="user_register"),
     path("profile/<int:pk>/", UserProfileAPIView.as_view(), name="user_profile_detail"),
 
-    # Финтех-эндпоинты Stripe (Задание 2)
+    # Платежи
     path("payments/", PaymentListAPIView.as_view(), name="payment_list"),
-    path("payments/create/", PaymentCreateAPIView.as_view(), name="payment_create"),
 ]
