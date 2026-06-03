@@ -3,6 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Загружаем переменные из .env
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +24,8 @@ INSTALLED_APPS = [
     # Сторонние пакеты
     "rest_framework",
     "django_filters",
-    "rest_framework_simplejwt",  # Подключили JWT-авторизацию (Задание 1)
+    "rest_framework_simplejwt",
+    "django_celery_beat",  # Планировщик периодических фоновых задач (Задание 1, 3)
 
     # Наши приложения
     "users",
@@ -70,19 +72,19 @@ DATABASES = {
     }
 }
 
+# Переключение на кастомную модель пользователя
 AUTH_USER_MODEL = "users.User"
 
-# Глобальные настройки Django Rest Framework (Задание 1)
+# Глобальные настройки Django Rest Framework (Урок 31)
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",  # Глобально закрыли весь API авторизацией
+        "rest_framework.permissions.IsAuthenticated",
     ),
 }
 
-# Настройки времени жизни JWT-токенов
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -101,6 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# Настройки локализации и Timezone (Строгое совпадение по ТЗ для Задания 3)
 LANGUAGE_CODE = "ru-ru"
 TIME_ZONE = "Europe/Moscow"
 USE_I18N = True
@@ -111,3 +114,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# --- Настройки Celery (Задание 1, 3) ---
+# Фиксируем принудительный протокол RESP2 прямо в URL подключения для старых Redis на Windows
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0?protocol=2")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/0")
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+
+# Заглушка для совместимости импортов в ветке 33
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "sk_test_placeholder")
