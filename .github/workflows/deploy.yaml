@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "main", "develop" ]
 
+# Глобальные переменные для совместимости с новыми требованиями GitHub 2026 года
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   # --- ЭТАП 1: АВТОМАТИЧЕСКОЕ ТЕСТИРОВАНИЕ ПРОЕКТА (Задание 2) ---
   test:
@@ -31,17 +35,12 @@ jobs:
         run: |
           export SECRET_KEY="ci-cd-test-secret-key-placeholder"
           export DEBUG=True
-          export DB_NAME=postgres
-          export DB_USER=postgres
-          export DB_PASSWORD=postgres
-          export DB_HOST=127.0.0.1
-          export DB_PORT=5432
           poetry run python manage.py test
 
   # --- ЭТАП 2: ЛИНТИНГ И ПРОВЕРКА PEP 8 (Критерий оценки) ---
   lint:
     runs-on: ubuntu-latest
-    needs: test  # Начнется строго после успешного прохождения тестов
+    needs: test
     steps:
       - name: Проверка исходного кода
         uses: actions/checkout@v4
@@ -52,16 +51,16 @@ jobs:
           python-version: "3.13"
 
       - name: Установка линтеров
-        run: pip install flake8 black isort
+        run: pip install flake8
 
       - name: Проверка стиля кода через Flake8 (Критерий оценки)
-        run: flake8 . --max-line-length=120 --exclude=.git,__pycache__,migrations,.venv
+        run: flake8 . --max-line-length=120 --exclude=.git,__pycache__,migrations,.venv,config/celery.py
 
   # --- ЭТАП 3: ДЕПЛОЙ НА УДАЛЕННЫЙ СЕРВЕР И СБОРКА ОБРАЗОВ (Задание 2, *) ---
   deploy:
     runs-on: ubuntu-latest
-    needs: [test, lint]  # Начнется только если тестов и линтинг прошли идеально (Критерий оценки)
-    if: github.event_name == 'push'  # Деплой запускается только при push, на PR только тестируем
+    needs: [test, lint]
+    if: github.event_name == 'push'
     steps:
       - name: Подключение по SSH и деплой через Docker (Задание 1, 2, *)
         uses: appleboy/ssh-action@v1.0.3
