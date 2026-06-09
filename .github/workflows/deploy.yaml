@@ -1,0 +1,77 @@
+name: Django CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop", "docker_homework_2" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  # --- ЭТАП 1: АВТОМАТИЧЕСКОЕ ТЕСТИРОВАНИЕ ПРОЕКТА (Задание 2) ---
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Проверка исходного кода
+        uses: actions/checkout@v4
+
+      - name: Настройка Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Установка Poetry
+        run: |
+          curl -sSL https://python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Установка зависимостей
+        run: poetry install --no-root
+
+      - name: Запуск автотестов Django (Задание 2)
+        run: |
+          export SECRET_KEY="ci-cd-test-secret-key-placeholder"
+          export DEBUG=True
+          export DB_NAME=postgres
+          export DB_USER=postgres
+          export DB_PASSWORD=postgres
+          export DB_HOST=127.0.0.1
+          export DB_PORT=5432
+          poetry run python manage.py test
+
+  # --- ЭТАП 2: ЛИНТИНГ И ПРОВЕРКА PEP 8 (Критерий оценки) ---
+  lint:
+    runs-on: ubuntu-latest
+    needs: test  # Начнется строго после успешного прохождения тестов
+    steps:
+      - name: Проверка исходного кода
+        uses: actions/checkout@v4
+
+      - name: Настройка Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Установка линтеров
+        run: pip install flake8 black isort
+
+      - name: Проверка стиля кода через Flake8 (Критерий оценки)
+        run: flake8 . --max-line-length=120 --exclude=.git,__pycache__,migrations,.venv
+
+  # --- ЭТАП 3: ДЕПЛОЙ НА УДАЛЕННЫЙ СЕРВЕР И СБОРКА ОБРАЗОВ (Задание 2, *) ---
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [test, lint]  # Начнется только если тестов и линтинг прошли идеально (Критерий оценки)
+    if: github.event_name == 'push'  # Деплой запускается только при push, на PR только тестируем
+    steps:
+      - name: Подключение по SSH и деплой через Docker (Задание 1, 2, *)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /app/lms_project || mkdir -p /app/lms_project && cd /app/lms_project
+            git pull origin develop
+            docker compose down
+            docker compose up --build -d
+            docker compose exec -T web python manage.py migrate
