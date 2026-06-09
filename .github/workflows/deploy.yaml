@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ "main", "develop" ]
 
-# Глобальные переменные для совместимости с новыми требованиями GitHub 2026 года
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
@@ -23,12 +22,13 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Установка Poetry
+      - name: Установка Poetry напрямую через pip (Быстро и без ошибок HTML!)
         run: |
-          curl -sSL https://python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          pip install poetry
+          # Отключаем создание виртуальных окружений в облаке, ставим пакеты прямо в систему
+          poetry config virtualenvs.create false
 
-      - name: Установка зависимостей
+      - name: Установка зависимостей проекта
         run: poetry install --no-root
 
       - name: Запуск автотестов Django (Задание 2)
