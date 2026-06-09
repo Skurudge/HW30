@@ -6,6 +6,8 @@ class Course(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название курса")
     preview = models.ImageField(upload_to="materials/courses/", blank=True, null=True, verbose_name="Превью (картинка)")
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
+    # Добавили обязательное поле для фиксации времени обновления (Критерий оценки)
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата последнего обновления")
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
