@@ -2,7 +2,6 @@ name: Django CI/CD Pipeline
 
 on:
   push:
-    # Запускаем пуш только для главных веток, а рабочие ветки проверяем через Pull Request
     branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main", "develop" ]
@@ -85,6 +84,9 @@ jobs:
             echo "DB_NAME=${{ secrets.DB_NAME }}" > .env
             echo "DB_USER=${{ secrets.DB_USER }}" >> .env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            
+            # Очищаем сломанный кэш сборщика Docker на сервере
+            docker builder prune -f
             
             docker compose down
             docker compose up --build -d
