@@ -28,6 +28,6 @@ class Command(BaseCommand):
         moderator_group.permissions.set(permissions)
 
         if created:
-            self.stdout.write(self.style.SUCCESS("Группа 'Модераторы' успешно создана с правами просмотра и изменения контента!"))
+            self.stdout.write(self.style.SUCCESS("Группа 'Модераторы' создана с правами просмотра и изменения!"))
         else:
-            self.stdout.write(self.style.WARNING("Группа 'Модераторы' уже существует. Права доступа успешно обновлены."))
+            self.stdout.write(self.style.WARNING("Группа 'Модераторы' существует. Права доступа обновлены."))
